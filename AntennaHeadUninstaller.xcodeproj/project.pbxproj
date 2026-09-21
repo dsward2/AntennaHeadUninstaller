@@ -1,0 +1,335 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		431387EB7262E1CFC79B125E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4DC844ABCCFC0D132D087C1C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 99889D60A11D60E2AA54819D;
+			remoteInfo = AntennaHeadUninstaller;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		B9C486CBBD4C5E82DD1534B6 /* AntennaHead Uninstaller.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "AntennaHead Uninstaller.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		19DDE46D5639C317BA948BA4 /* AntennaHeadUninstallerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AntennaHeadUninstallerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		E8E4FFBB286BA59E6C040EC3 /* AntennaHeadUninstaller */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = AntennaHeadUninstaller;
+			sourceTree = "<group>";
+		};
+		6351AB31DE05ED29FA3E7B03 /* AntennaHeadUninstallerTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = AntennaHeadUninstallerTests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D964E2CB2ACFE6233E12418C /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		015652DAA5DF605CCC15F5BE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		FAD58DE7366495DB4650CFEF = {
+			isa = PBXGroup;
+			children = (
+				E8E4FFBB286BA59E6C040EC3 /* AntennaHeadUninstaller */,
+				6351AB31DE05ED29FA3E7B03 /* AntennaHeadUninstallerTests */,
+				86024CAD1E83101D97359D73 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		86024CAD1E83101D97359D73 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B9C486CBBD4C5E82DD1534B6 /* AntennaHead Uninstaller.app */,
+				19DDE46D5639C317BA948BA4 /* AntennaHeadUninstallerTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		99889D60A11D60E2AA54819D /* AntennaHeadUninstaller */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F692AEDB477C0CCBA7B92315 /* Build configuration list for PBXNativeTarget "AntennaHeadUninstaller" */;
+			buildPhases = (
+				9C0CDACBCB11B5A73C0A33C6 /* Sources */,
+				D964E2CB2ACFE6233E12418C /* Frameworks */,
+				F1E4C7A124641C6201468B9C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				E8E4FFBB286BA59E6C040EC3 /* AntennaHeadUninstaller */,
+			);
+			name = AntennaHeadUninstaller;
+			productName = AntennaHeadUninstaller;
+			productReference = B9C486CBBD4C5E82DD1534B6 /* AntennaHead Uninstaller.app */;
+			productType = "com.apple.product-type.application";
+		};
+		124C588D1E4E0F457FAD7DFF /* AntennaHeadUninstallerTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 96484D38E310E39ECFA7B0FB /* Build configuration list for PBXNativeTarget "AntennaHeadUninstallerTests" */;
+			buildPhases = (
+				CC687EAC0A40BA68600C6802 /* Sources */,
+				015652DAA5DF605CCC15F5BE /* Frameworks */,
+				B0436A936A401BB9700034A7 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				2254342BECCEAFBD04538E0A /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				6351AB31DE05ED29FA3E7B03 /* AntennaHeadUninstallerTests */,
+			);
+			name = AntennaHeadUninstallerTests;
+			productName = AntennaHeadUninstallerTests;
+			productReference = 19DDE46D5639C317BA948BA4 /* AntennaHeadUninstallerTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		4DC844ABCCFC0D132D087C1C /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2700;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					99889D60A11D60E2AA54819D = {
+						CreatedOnToolsVersion = 27.0;
+					};
+					124C588D1E4E0F457FAD7DFF = {
+						CreatedOnToolsVersion = 27.0;
+						TestTargetID = 99889D60A11D60E2AA54819D;
+					};
+				};
+			};
+			buildConfigurationList = E9898A0EB58D6691901DFE9F /* Build configuration list for PBXProject "AntennaHeadUninstaller" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = FAD58DE7366495DB4650CFEF;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 86024CAD1E83101D97359D73 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				99889D60A11D60E2AA54819D /* AntennaHeadUninstaller */,
+				124C588D1E4E0F457FAD7DFF /* AntennaHeadUninstallerTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F1E4C7A124641C6201468B9C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B0436A936A401BB9700034A7 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9C0CDACBCB11B5A73C0A33C6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CC687EAC0A40BA68600C6802 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		2254342BECCEAFBD04538E0A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 99889D60A11D60E2AA54819D /* AntennaHeadUninstaller */;
+			targetProxy = 431387EB7262E1CFC79B125E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		8A5B8A9BF9D581B5CAF9A34F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = ("DEBUG=1", "$(inherited)");
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		90F27A7571F664C0BBDFF1EF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		CDE2A25D1FBB9481F0F3AC20 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = AntennaHeadUninstaller.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MMFBWVS455;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "AntennaHead Uninstaller";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSAppleEventsUsageDescription = "AntennaHead Uninstaller asks Finder to move AntennaHead and ControlBooth files to the Trash, so that Put Back can restore them.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 Douglas S. Ward";
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dsward.AntennaHeadUninstaller;
+				PRODUCT_MODULE_NAME = AntennaHeadUninstaller;
+				PRODUCT_NAME = "AntennaHead Uninstaller";
+			};
+			name = Debug;
+		};
+		C2B8ADCE5DE529EEEEE8B603 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = AntennaHeadUninstaller.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MMFBWVS455;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "AntennaHead Uninstaller";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_NSAppleEventsUsageDescription = "AntennaHead Uninstaller asks Finder to move AntennaHead and ControlBooth files to the Trash, so that Put Back can restore them.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2026 Douglas S. Ward";
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dsward.AntennaHeadUninstaller;
+				PRODUCT_MODULE_NAME = AntennaHeadUninstaller;
+				PRODUCT_NAME = "AntennaHead Uninstaller";
+			};
+			name = Release;
+		};
+		B1DCF8A32012C08BED76F486 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MMFBWVS455;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dsward.AntennaHeadUninstallerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AntennaHead Uninstaller.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/AntennaHead Uninstaller";
+			};
+			name = Debug;
+		};
+		F97DC2A722E4066E71B05EEA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = MMFBWVS455;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dsward.AntennaHeadUninstallerTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AntennaHead Uninstaller.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/AntennaHead Uninstaller";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E9898A0EB58D6691901DFE9F /* Build configuration list for PBXProject "AntennaHeadUninstaller" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8A5B8A9BF9D581B5CAF9A34F /* Debug */,
+				90F27A7571F664C0BBDFF1EF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F692AEDB477C0CCBA7B92315 /* Build configuration list for PBXNativeTarget "AntennaHeadUninstaller" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CDE2A25D1FBB9481F0F3AC20 /* Debug */,
+				C2B8ADCE5DE529EEEEE8B603 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		96484D38E310E39ECFA7B0FB /* Build configuration list for PBXNativeTarget "AntennaHeadUninstallerTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B1DCF8A32012C08BED76F486 /* Debug */,
+				F97DC2A722E4066E71B05EEA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 4DC844ABCCFC0D132D087C1C /* Project object */;
+}
