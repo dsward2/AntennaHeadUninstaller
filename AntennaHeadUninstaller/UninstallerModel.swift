@@ -12,6 +12,8 @@ final class UninstallerModel {
     var results: [ActionResult] = []
     var stillRunning: [String] = []
     var notice: String?
+    /// True when macOS is (or was) blocking access to the apps' containers.
+    var needsDataAccess = false
 
     private let catalog: Catalog
 
@@ -27,6 +29,7 @@ final class UninstallerModel {
         let ttsItems = items.filter { $0.kind == .textToSpeech }
         items = catalog.items() + ttsItems
         phase = .ready
+        needsDataAccess = Self.protectedFolderIsBlocked(items)
         // Sizes are best-effort (protected folders can't be measured), computed off the main thread.
         Task.detached { [items] in
             var sizes: [String: Int64] = [:]
@@ -72,6 +75,7 @@ final class UninstallerModel {
         stillRunning = []
         let plan = Planner.plan(items)
         results = Uninstaller().run(plan)
+        needsDataAccess = results.contains { if case .failed(let m) = $0.outcome { m == TrashError.needsDataAccess.errorDescription } else { false } }
         // The apps are gone, so drop cached preferences that could otherwise be written back.
         let p = Process(); p.executableURL = URL(fileURLWithPath: "/usr/bin/killall"); p.arguments = ["cfprefsd"]
         try? p.run(); p.waitUntilExit()
@@ -100,6 +104,22 @@ final class UninstallerModel {
     }
 
     func reveal(_ url: URL) { NSWorkspace.shared.activateFileViewerSelecting([url]) }
+
+    func openFullDiskAccessSettings() {
+        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles") {
+            NSWorkspace.shared.open(url)
+        }
+    }
+
+    /// True if any selected system-managed folder can't be read by this app right now.
+    static func protectedFolderIsBlocked(_ items: [UninstallItem]) -> Bool {
+        for item in items where item.selected {
+            guard let url = item.url, Planner.isSystemManaged(url) else { continue }
+            do { _ = try FileManager.default.contentsOfDirectory(atPath: url.path) }
+            catch { if FileManagerTrasher.translate(error) == .needsDataAccess { return true } }
+        }
+        return false
+    }
 
     func openTrash() {
         NSAppleScript(source: "tell application \"Finder\" to open trash\ntell application \"Finder\" to activate")?.executeAndReturnError(nil)

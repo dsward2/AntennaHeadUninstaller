@@ -27,6 +27,7 @@ struct ContentView: View {
                 Text("Everything ticked below is moved to the Trash, not deleted, so you can bring it back with Finder’s Put Back. AntennaHead and ControlBooth are quit first.")
                     .foregroundStyle(.secondary)
                 if let notice = model.notice { Text(notice).foregroundStyle(.red) }
+                if model.needsDataAccess { dataAccessBanner }
                 if !model.stillRunning.isEmpty {
                     Text("Couldn’t quit: \(model.stillRunning.joined(separator: ", ")). Quit them yourself, or use Force Quit below.")
                         .foregroundStyle(.orange)
@@ -78,6 +79,18 @@ struct ContentView: View {
         }
     }
 
+    private var dataAccessBanner: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Label("macOS is blocking access to the apps’ protected data folders.", systemImage: "lock.trianglebadge.exclamationmark")
+                .foregroundStyle(.orange)
+            Text("If macOS asked to let this app access data from other apps, choose Allow. Otherwise open Full Disk Access, switch on AntennaHead Uninstaller, then quit and reopen it. Without this, the App container and App Group container can’t be moved to the Trash.")
+                .font(.callout).foregroundStyle(.secondary)
+            Button("Open Full Disk Access Settings") { model.openFullDiskAccessSettings() }
+        }
+        .padding(10)
+        .background(.orange.opacity(0.12), in: RoundedRectangle(cornerRadius: 8))
+    }
+
     private var confirmationMessage: String {
         var lines = ["\(model.selectedCount) item(s) will be moved to the Trash."]
         let names = model.runningAppNames
@@ -117,6 +130,7 @@ struct ContentView: View {
                     .foregroundStyle(.secondary).multilineTextAlignment(.center)
             }
             .padding(16)
+            if model.needsDataAccess { dataAccessBanner.padding(.horizontal, 16).padding(.bottom, 8) }
             List(model.results) { r in
                 HStack(alignment: .firstTextBaseline) {
                     switch r.outcome {

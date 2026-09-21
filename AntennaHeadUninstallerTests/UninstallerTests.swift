@@ -188,6 +188,83 @@ final class UninstallerTests: XCTestCase {
         XCTAssertTrue(titles.contains { $0.contains("group.com.dsward.antennahead") && $0.contains("keeping Recordings") }, "\(titles)")
     }
 
+    // MARK: System-managed folders
+
+    func testContainersAndGroupContainersAreSystemManaged() {
+        func managed(_ p: String) -> Bool { Planner.isSystemManaged(URL(fileURLWithPath: p)) }
+        XCTAssertTrue(managed("/Users/tester/Library/Containers/com.dsward.AntennaHead"))
+        XCTAssertTrue(managed("/Users/tester/Library/Group Containers/group.com.dsward.antennahead"))
+        XCTAssertTrue(managed("/Users/tester/Library/Group Containers/group.com.dsward.antennahead/Recordings"))
+        XCTAssertFalse(managed("/Users/tester/Library/Application Support/AntennaHead"))
+        XCTAssertFalse(managed("/Users/tester/Library/Preferences/com.dsward.AntennaHead.plist"))
+        XCTAssertFalse(managed("/Applications/AntennaHead.app"))
+    }
+
+    /// Finder answers the managed folders with error -5000, so they must never be sent to Finder.
+    func testManagedFoldersGoToTheDirectTrasherAndEverythingElseToFinder() {
+        let finder = SpyTrasher(), direct = SpyTrasher()
+        let u = Uninstaller(trasher: finder, managedTrasher: direct, removeCertificates: { 1 }, exists: { _ in true })
+        let group = URL(fileURLWithPath: "/Users/tester/Library/Group Containers/group.com.dsward.antennahead")
+        let results = u.run([
+            .trash(URL(fileURLWithPath: "/Applications/AntennaHead.app"), title: "app"),
+            .trash(URL(fileURLWithPath: "/Users/tester/Library/Application Support/AntennaHead"), title: "support"),
+            .trash(URL(fileURLWithPath: "/Users/tester/Library/Containers/com.dsward.AntennaHead"), title: "container"),
+            .trashContents(of: group, except: ["Recordings"], title: "group"),
+        ])
+        XCTAssertEqual(results.map(\.outcome), [.done, .done, .done, .done])
+        XCTAssertEqual(finder.batches.flatMap { $0 }.map(\.lastPathComponent), ["AntennaHead.app", "AntennaHead"])
+        XCTAssertEqual(direct.trashed.map(\.lastPathComponent), ["com.dsward.AntennaHead"])
+        XCTAssertEqual(direct.contents.map(\.0), [group])
+        XCTAssertTrue(finder.contents.isEmpty, "Finder must not be asked to empty the group container")
+    }
+
+    func testMissingDataAccessIsReportedWithGuidance() {
+        struct Denied: Trasher {
+            func trash(_ url: URL) throws { throw TrashError.needsDataAccess }
+            func trashContents(of folder: URL, except names: [String]) throws { throw TrashError.needsDataAccess }
+        }
+        let u = Uninstaller(trasher: Denied(), managedTrasher: Denied(), removeCertificates: { 1 })
+        let r = u.run([.trash(URL(fileURLWithPath: "/Users/tester/Library/Containers/x"), title: "c")])
+        guard case .failed(let m) = r[0].outcome else { return XCTFail() }
+        XCTAssertTrue(m.contains("Full Disk Access"))
+    }
+
+    func testPOSIXPermissionErrorsMapToNeedsDataAccess() {
+        let eperm = NSError(domain: NSCocoaErrorDomain, code: NSFileWriteUnknownError,
+                            userInfo: [NSUnderlyingErrorKey: NSError(domain: NSPOSIXErrorDomain, code: Int(EPERM))])
+        XCTAssertEqual(FileManagerTrasher.translate(eperm), .needsDataAccess)
+        XCTAssertEqual(FileManagerTrasher.translate(NSError(domain: NSCocoaErrorDomain, code: NSFileWriteNoPermissionError)), .needsDataAccess)
+        XCTAssertEqual(FileManagerTrasher.translate(NSError(domain: NSCocoaErrorDomain, code: NSFileNoSuchFileError)), .notPresent)
+    }
+
+    // MARK: The real FileManager trasher (uses scratch files, and cleans the Trash afterwards)
+
+    func testFileManagerTrasherMovesAFileToTheTrash() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("trasher-\(UUID().uuidString)")
+        try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        addTeardownBlock { try? FileManager.default.removeItem(at: dir) }
+        let file = dir.appendingPathComponent("probe.txt")
+        try "x".write(to: file, atomically: true, encoding: .utf8)
+        var trashed: NSURL?
+        try FileManager.default.trashItem(at: file, resultingItemURL: &trashed)
+        addTeardownBlock { if let t = trashed as URL? { try? FileManager.default.removeItem(at: t) } }
+        XCTAssertFalse(FileManager.default.fileExists(atPath: file.path))
+        XCTAssertThrowsError(try FileManagerTrasher().trash(file)) { XCTAssertEqual($0 as? TrashError, .notPresent) }
+    }
+
+    func testFileManagerTrasherKeepsTheNamedChildren() throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("keep-\(UUID().uuidString)")
+        let fm = FileManager.default
+        try fm.createDirectory(at: dir.appendingPathComponent("Recordings"), withIntermediateDirectories: true)
+        try "r".write(to: dir.appendingPathComponent("Recordings/a.aac"), atomically: true, encoding: .utf8)
+        try "d".write(to: dir.appendingPathComponent("junk-\(UUID().uuidString).db"), atomically: true, encoding: .utf8)
+        addTeardownBlock { try? fm.removeItem(at: dir) }
+        try FileManagerTrasher().trashContents(of: dir, except: ["Recordings"])
+        let left = try fm.contentsOfDirectory(atPath: dir.path)
+        XCTAssertEqual(left, ["Recordings"])
+        XCTAssertTrue(fm.fileExists(atPath: dir.appendingPathComponent("Recordings/a.aac").path))
+    }
+
     func testAppleScriptLiteralEscaping() {
         XCTAssertEqual(FinderTrasher.literal(#"/a/b "c"\d"#), #""/a/b \"c\"\\d""#)
     }

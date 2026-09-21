@@ -50,6 +50,13 @@ enum Planner {
         return apps + data + keychain
     }
 
+    /// Folders macOS manages itself. Finder refuses to trash these when asked by another app
+    /// (error -5000), so they are moved in-process instead.
+    static func isSystemManaged(_ url: URL) -> Bool {
+        let path = url.standardizedFileURL.path
+        return path.contains("/Library/Containers/") || path.contains("/Library/Group Containers/")
+    }
+
     /// Folders the user may pick as their text-to-speech folder. Refuses anything broad
     /// enough that trashing it would take far more than AntennaHead's own files.
     static func isSafeToTrashAsTextToSpeechFolder(_ url: URL, home: URL) -> Bool {

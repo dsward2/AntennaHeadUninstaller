@@ -13,7 +13,10 @@ struct ActionResult: Identifiable, Equatable {
 /// Runs a plan. Continues past individual failures so one locked folder doesn't
 /// leave the rest behind, and reports each step.
 struct Uninstaller {
+    /// For ordinary items (Finder can also ask for an administrator password when needed).
     var trasher: Trasher = FinderTrasher()
+    /// For the system-managed Containers / Group Containers folders, which Finder won't move.
+    var managedTrasher: Trasher = FileManagerTrasher()
     var removeCertificates: () throws -> Int = { try CertificateRemover().removeAll() }
     /// Used after a failed batch to tell items Finder already moved from ones still in place.
     var exists: (URL) -> Bool = { FileManager.default.fileExists(atPath: $0.path) }
@@ -25,7 +28,7 @@ struct Uninstaller {
             // Consecutive plain trashes go to Finder as one request, so a password prompt
             // (for root-owned items, say) appears once instead of once per file.
             var batch: [(URL, String)] = []
-            while index < actions.count, case .trash(let url, let title) = actions[index] {
+            while index < actions.count, case .trash(let url, let title) = actions[index], !Planner.isSystemManaged(url) {
                 batch.append((url, title)); index += 1
             }
             if !batch.isEmpty {
@@ -58,8 +61,9 @@ struct Uninstaller {
         }
         do {
             switch action {
-            case .trash(let u, _): try trasher.trash(u)
-            case .trashContents(let folder, let except, _): try trasher.trashContents(of: folder, except: except)
+            case .trash(let u, _): try (Planner.isSystemManaged(u) ? managedTrasher : trasher).trash(u)
+            case .trashContents(let folder, let except, _):
+                try (Planner.isSystemManaged(folder) ? managedTrasher : trasher).trashContents(of: folder, except: except)
             case .removeCertificate: _ = try removeCertificates()
             }
             return ActionResult(title: action.title, url: url, outcome: .done)

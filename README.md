@@ -34,6 +34,17 @@ is why Full Disk Access isn't needed even for the protected `Containers` and
 `Group Containers` folders. If you decline, allow it under System Settings ▸ Privacy &
 Security ▸ Automation.
 
+## Why the containers are moved differently
+
+Finder refuses to move the system-managed `Containers` and `Group Containers` folders
+when another app asks it to (error -5000). Those two kinds of folder are therefore moved
+in-process with `FileManager.trashItem`, which still supports Put Back. macOS gates that
+with its own consent: allow the "access data from other apps" prompt if it appears, or
+turn the app on under System Settings ▸ Privacy & Security ▸ Full Disk Access and reopen
+it. Everything else still goes through Finder in a single request (one authorization
+prompt at most). If a step fails, **Copy Report** in the results window gathers the
+error codes and paths.
+
 ## How "keep recordings" works
 
 Recordings live at `Group Containers/group.com.dsward.antennahead/Recordings`. With
