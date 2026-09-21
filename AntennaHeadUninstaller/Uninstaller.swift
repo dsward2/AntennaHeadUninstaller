@@ -5,6 +5,8 @@ struct ActionResult: Identifiable, Equatable {
     enum Outcome: Equatable { case done, skipped(String), failed(String) }
     let id = UUID()
     let title: String
+    /// The file or folder this step was about, when it has one.
+    var url: URL? = nil
     let outcome: Outcome
 }
 
@@ -13,21 +15,58 @@ struct ActionResult: Identifiable, Equatable {
 struct Uninstaller {
     var trasher: Trasher = FinderTrasher()
     var removeCertificates: () throws -> Int = { try CertificateRemover().removeAll() }
+    /// Used after a failed batch to tell items Finder already moved from ones still in place.
+    var exists: (URL) -> Bool = { FileManager.default.fileExists(atPath: $0.path) }
 
     func run(_ actions: [UninstallAction]) -> [ActionResult] {
-        actions.map { action in
-            do {
-                switch action {
-                case .trash(let url, _): try trasher.trash(url)
-                case .trashContents(let folder, let except, _): try trasher.trashContents(of: folder, except: except)
-                case .removeCertificate: _ = try removeCertificates()
-                }
-                return ActionResult(title: action.title, outcome: .done)
-            } catch TrashError.notPresent {
-                return ActionResult(title: action.title, outcome: .skipped("Not present"))
-            } catch {
-                return ActionResult(title: action.title, outcome: .failed(error.localizedDescription))
+        var results: [ActionResult] = []
+        var index = 0
+        while index < actions.count {
+            // Consecutive plain trashes go to Finder as one request, so a password prompt
+            // (for root-owned items, say) appears once instead of once per file.
+            var batch: [(URL, String)] = []
+            while index < actions.count, case .trash(let url, let title) = actions[index] {
+                batch.append((url, title)); index += 1
             }
+            if !batch.isEmpty {
+                results += runBatch(batch)
+                continue
+            }
+            results.append(runOne(actions[index]))
+            index += 1
+        }
+        return results
+    }
+
+    /// One Finder request for the whole batch; if it fails, retry item by item so the
+    /// report says exactly which ones couldn't be moved and why.
+    private func runBatch(_ batch: [(URL, String)]) -> [ActionResult] {
+        if batch.count > 1, (try? trasher.trashAll(batch.map(\.0))) != nil {
+            return batch.map { ActionResult(title: $0.1, url: $0.0, outcome: .done) }
+        }
+        return batch.map { url, title in
+            // Finder may have moved some items before the batch as a whole failed.
+            exists(url) ? runOne(.trash(url, title: title)) : ActionResult(title: title, url: url, outcome: .done)
+        }
+    }
+
+    private func runOne(_ action: UninstallAction) -> ActionResult {
+        let url: URL?
+        switch action {
+        case .trash(let u, _), .trashContents(let u, _, _): url = u
+        case .removeCertificate: url = nil
+        }
+        do {
+            switch action {
+            case .trash(let u, _): try trasher.trash(u)
+            case .trashContents(let folder, let except, _): try trasher.trashContents(of: folder, except: except)
+            case .removeCertificate: _ = try removeCertificates()
+            }
+            return ActionResult(title: action.title, url: url, outcome: .done)
+        } catch TrashError.notPresent {
+            return ActionResult(title: action.title, url: url, outcome: .skipped("Not present"))
+        } catch {
+            return ActionResult(title: action.title, url: url, outcome: .failed(error.localizedDescription))
         }
     }
 }

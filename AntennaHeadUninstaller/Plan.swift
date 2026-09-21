@@ -33,12 +33,12 @@ enum Planner {
             case .groupContainer:
                 guard let url = item.url else { continue }
                 if recordings != nil {
-                    data.append(.trash(url, title: item.title + " (including Recordings)"))
+                    data.append(.trash(url, title: item.title + " — " + url.lastPathComponent + " (including Recordings)"))
                 } else {
-                    data.append(.trashContents(of: url, except: ["Recordings"], title: item.title + " (keeping Recordings)"))
+                    data.append(.trashContents(of: url, except: ["Recordings"], title: item.title + " — " + url.lastPathComponent + " (keeping Recordings)"))
                 }
             case .recordings:
-                if container == nil, let url = item.url { data.append(.trash(url, title: item.title)) }
+                if container == nil, let url = item.url { data.append(.trash(url, title: item.title + " — " + url.lastPathComponent)) }
             case .certificate:
                 keychain.append(.removeCertificate(title: item.title))
             case .file, .textToSpeech:

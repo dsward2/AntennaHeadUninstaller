@@ -131,7 +131,13 @@ final class UninstallerTests: XCTestCase {
 
     private final class SpyTrasher: Trasher {
         var trashed: [URL] = []; var contents: [(URL, [String])] = []
+        var batches: [[URL]] = []; var failBatch = false
         var failOn: String?; var missing: String?
+        func trashAll(_ urls: [URL]) throws {
+            batches.append(urls)
+            if failBatch { throw TrashError.failed("batch refused") }
+            for u in urls { try trash(u) }
+        }
         func trash(_ url: URL) throws {
             if url.lastPathComponent == missing { throw TrashError.notPresent }
             if url.lastPathComponent == failOn { throw TrashError.failed("locked") }
@@ -142,11 +148,44 @@ final class UninstallerTests: XCTestCase {
 
     func testRunContinuesPastFailuresAndReportsEach() {
         let spy = SpyTrasher(); spy.failOn = "b"; spy.missing = "c"
-        let u = Uninstaller(trasher: spy, removeCertificates: { 1 })
+        let u = Uninstaller(trasher: spy, removeCertificates: { 1 }, exists: { _ in true })
         let results = u.run([.trash(URL(fileURLWithPath: "/x/a"), title: "a"), .trash(URL(fileURLWithPath: "/x/b"), title: "b"),
                              .trash(URL(fileURLWithPath: "/x/c"), title: "c"), .removeCertificate(title: "cert")])
         XCTAssertEqual(results.map(\.outcome), [.done, .failed("locked"), .skipped("Not present"), .done])
-        XCTAssertEqual(spy.trashed.map(\.lastPathComponent), ["a"])
+        XCTAssertEqual(Set(spy.trashed.map(\.lastPathComponent)), ["a"])
+    }
+
+    func testConsecutiveTrashesGoToFinderAsOneRequest() {
+        let spy = SpyTrasher()
+        let u = Uninstaller(trasher: spy, removeCertificates: { 1 })
+        let r = u.run([.trash(URL(fileURLWithPath: "/x/a"), title: "a"), .trash(URL(fileURLWithPath: "/x/b"), title: "b"),
+                       .trash(URL(fileURLWithPath: "/x/c"), title: "c")])
+        XCTAssertEqual(spy.batches.count, 1, "one Finder request, so one authorization prompt")
+        XCTAssertEqual(spy.batches[0].map(\.lastPathComponent), ["a", "b", "c"])
+        XCTAssertEqual(r.map(\.outcome), [.done, .done, .done])
+    }
+
+    func testFailedBatchFallsBackToPerItemSoTheReportNamesTheCulprit() {
+        let spy = SpyTrasher(); spy.failBatch = true; spy.failOn = "b"
+        let u = Uninstaller(trasher: spy, removeCertificates: { 1 }, exists: { _ in true })
+        let r = u.run([.trash(URL(fileURLWithPath: "/x/a"), title: "a"), .trash(URL(fileURLWithPath: "/x/b"), title: "b")])
+        XCTAssertEqual(r.map(\.outcome), [.done, .failed("locked")])
+        XCTAssertEqual(r[1].url?.path, "/x/b", "failures carry the path for the report")
+    }
+
+    func testItemsAlreadyMovedByAFailedBatchAreReportedDoneNotMissing() {
+        let spy = SpyTrasher(); spy.failBatch = true
+        let gone: Set<String> = ["a"]
+        let u = Uninstaller(trasher: spy, removeCertificates: { 1 }, exists: { !gone.contains($0.lastPathComponent) })
+        let r = u.run([.trash(URL(fileURLWithPath: "/x/a"), title: "a"), .trash(URL(fileURLWithPath: "/x/b"), title: "b")])
+        XCTAssertEqual(r.map(\.outcome), [.done, .done])
+        XCTAssertEqual(spy.trashed.map(\.lastPathComponent), ["b"], "only the item still in place is retried")
+    }
+
+    func testGroupContainerResultNamesTheFolder() {
+        let actions = plan(recordings: false)
+        let titles = actions.map(\.title)
+        XCTAssertTrue(titles.contains { $0.contains("group.com.dsward.antennahead") && $0.contains("keeping Recordings") }, "\(titles)")
     }
 
     func testAppleScriptLiteralEscaping() {

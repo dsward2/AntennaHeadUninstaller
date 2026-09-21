@@ -124,10 +124,15 @@ struct ContentView: View {
                     case .skipped: Image(systemName: "minus.circle").foregroundStyle(.secondary)
                     case .failed: Image(systemName: "xmark.octagon").foregroundStyle(.red)
                     }
-                    VStack(alignment: .leading) {
+                    VStack(alignment: .leading, spacing: 2) {
                         Text(r.title)
                         switch r.outcome {
-                        case .skipped(let m), .failed(let m): Text(m).font(.caption).foregroundStyle(.secondary)
+                        case .skipped(let m), .failed(let m):
+                            Text(m).font(.caption).foregroundStyle(.secondary).textSelection(.enabled)
+                            if case .failed = r.outcome, let url = r.url {
+                                Text(url.path).font(.caption2).foregroundStyle(.secondary).textSelection(.enabled)
+                                Button("Show in Finder") { model.reveal(url) }.buttonStyle(.link).font(.caption)
+                            }
                         case .done: EmptyView()
                         }
                     }
@@ -136,6 +141,7 @@ struct ContentView: View {
             Divider()
             HStack {
                 Button("Open Trash") { model.openTrash() }
+                Button("Copy Report") { model.copyReport() }
                 Spacer()
                 Button("Scan Again") { model.scan() }
                 Button("Quit") { NSApplication.shared.terminate(nil) }.keyboardShortcut(.defaultAction)

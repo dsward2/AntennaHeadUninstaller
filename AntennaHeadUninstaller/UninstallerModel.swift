@@ -78,6 +78,29 @@ final class UninstallerModel {
         phase = .finished
     }
 
+    /// Plain-text report of the last run, for pasting into a bug report.
+    var reportText: String {
+        let os = ProcessInfo.processInfo.operatingSystemVersionString
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
+        var lines = ["AntennaHead Uninstaller \(version) — macOS \(os)", ""]
+        for r in results {
+            let path = r.url.map { "\n    path: \($0.path)" } ?? ""
+            switch r.outcome {
+            case .done: lines.append("OK       \(r.title)")
+            case .skipped(let m): lines.append("SKIPPED  \(r.title) — \(m)\(path)")
+            case .failed(let m): lines.append("FAILED   \(r.title) — \(m)\(path)")
+            }
+        }
+        return lines.joined(separator: "\n")
+    }
+
+    func copyReport() {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(reportText, forType: .string)
+    }
+
+    func reveal(_ url: URL) { NSWorkspace.shared.activateFileViewerSelecting([url]) }
+
     func openTrash() {
         NSAppleScript(source: "tell application \"Finder\" to open trash\ntell application \"Finder\" to activate")?.executeAndReturnError(nil)
     }

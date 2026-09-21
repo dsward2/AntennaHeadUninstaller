@@ -4,7 +4,13 @@ import AppKit
 /// Moves things to the Trash.
 protocol Trasher {
     func trash(_ url: URL) throws
+    /// Trashes several items with one request, so Finder asks for authorization at most once.
+    func trashAll(_ urls: [URL]) throws
     func trashContents(of folder: URL, except names: [String]) throws
+}
+
+extension Trasher {
+    func trashAll(_ urls: [URL]) throws { for u in urls { try trash(u) } }
 }
 
 enum TrashError: LocalizedError {
@@ -28,6 +34,23 @@ enum TrashError: LocalizedError {
 struct FinderTrasher: Trasher {
     func trash(_ url: URL) throws {
         try run("tell application \"Finder\" to delete (POSIX file \(Self.literal(url.path)) as alias)")
+    }
+
+    func trashAll(_ urls: [URL]) throws {
+        guard !urls.isEmpty else { return }
+        let paths = urls.map { Self.literal($0.path) }.joined(separator: ", ")
+        // Items that have vanished since the scan are skipped; anything else is a real error.
+        try run("""
+        tell application "Finder"
+            set theItems to {}
+            repeat with p in {\(paths)}
+                try
+                    set end of theItems to (POSIX file (contents of p) as alias)
+                end try
+            end repeat
+            if (count of theItems) > 0 then delete theItems
+        end tell
+        """)
     }
 
     func trashContents(of folder: URL, except names: [String]) throws {
@@ -56,7 +79,7 @@ struct FinderTrasher: Trasher {
         switch code {
         case -1743: throw TrashError.notAuthorized
         case -1728, -43, -10006: throw TrashError.notPresent   // can't get / file not found
-        default: throw TrashError.failed("\(message) (\(code))")
+        default: throw TrashError.failed("\(message) [Finder error \(code)]")
         }
     }
 }
