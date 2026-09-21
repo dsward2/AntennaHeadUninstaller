@@ -12,6 +12,8 @@ final class UninstallerModel {
     var results: [ActionResult] = []
     var stillRunning: [String] = []
     var notice: String?
+    /// True when macOS is (or was) blocking access to the apps' containers.
+    var needsDataAccess = false
 
     private let catalog: Catalog
 
@@ -27,6 +29,7 @@ final class UninstallerModel {
         let ttsItems = items.filter { $0.kind == .textToSpeech }
         items = catalog.items() + ttsItems
         phase = .ready
+        needsDataAccess = Self.protectedFolderIsBlocked(items)
         // Sizes are best-effort (protected folders can't be measured), computed off the main thread.
         Task.detached { [items] in
             var sizes: [String: Int64] = [:]
@@ -72,10 +75,50 @@ final class UninstallerModel {
         stillRunning = []
         let plan = Planner.plan(items)
         results = Uninstaller().run(plan)
+        needsDataAccess = results.contains { if case .failed(let m) = $0.outcome { m == TrashError.needsDataAccess.errorDescription } else { false } }
         // The apps are gone, so drop cached preferences that could otherwise be written back.
         let p = Process(); p.executableURL = URL(fileURLWithPath: "/usr/bin/killall"); p.arguments = ["cfprefsd"]
         try? p.run(); p.waitUntilExit()
         phase = .finished
+    }
+
+    /// Plain-text report of the last run, for pasting into a bug report.
+    var reportText: String {
+        let os = ProcessInfo.processInfo.operatingSystemVersionString
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
+        var lines = ["AntennaHead Uninstaller \(version) — macOS \(os)", ""]
+        for r in results {
+            let path = r.url.map { "\n    path: \($0.path)" } ?? ""
+            switch r.outcome {
+            case .done: lines.append("OK       \(r.title)")
+            case .skipped(let m): lines.append("SKIPPED  \(r.title) — \(m)\(path)")
+            case .failed(let m): lines.append("FAILED   \(r.title) — \(m)\(path)")
+            }
+        }
+        return lines.joined(separator: "\n")
+    }
+
+    func copyReport() {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(reportText, forType: .string)
+    }
+
+    func reveal(_ url: URL) { NSWorkspace.shared.activateFileViewerSelecting([url]) }
+
+    func openFullDiskAccessSettings() {
+        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles") {
+            NSWorkspace.shared.open(url)
+        }
+    }
+
+    /// True if any selected system-managed folder can't be read by this app right now.
+    static func protectedFolderIsBlocked(_ items: [UninstallItem]) -> Bool {
+        for item in items where item.selected {
+            guard let url = item.url, Planner.isSystemManaged(url) else { continue }
+            do { _ = try FileManager.default.contentsOfDirectory(atPath: url.path) }
+            catch { if FileManagerTrasher.translate(error) == .needsDataAccess { return true } }
+        }
+        return false
     }
 
     func openTrash() {

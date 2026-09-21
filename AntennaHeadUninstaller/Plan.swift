@@ -33,12 +33,12 @@ enum Planner {
             case .groupContainer:
                 guard let url = item.url else { continue }
                 if recordings != nil {
-                    data.append(.trash(url, title: item.title + " (including Recordings)"))
+                    data.append(.trash(url, title: item.title + " — " + url.lastPathComponent + " (including Recordings)"))
                 } else {
-                    data.append(.trashContents(of: url, except: ["Recordings"], title: item.title + " (keeping Recordings)"))
+                    data.append(.trashContents(of: url, except: ["Recordings"], title: item.title + " — " + url.lastPathComponent + " (keeping Recordings)"))
                 }
             case .recordings:
-                if container == nil, let url = item.url { data.append(.trash(url, title: item.title)) }
+                if container == nil, let url = item.url { data.append(.trash(url, title: item.title + " — " + url.lastPathComponent)) }
             case .certificate:
                 keychain.append(.removeCertificate(title: item.title))
             case .file, .textToSpeech:
@@ -48,6 +48,13 @@ enum Planner {
             }
         }
         return apps + data + keychain
+    }
+
+    /// Folders macOS manages itself. Finder refuses to trash these when asked by another app
+    /// (error -5000), so they are moved in-process instead.
+    static func isSystemManaged(_ url: URL) -> Bool {
+        let path = url.standardizedFileURL.path
+        return path.contains("/Library/Containers/") || path.contains("/Library/Group Containers/")
     }
 
     /// Folders the user may pick as their text-to-speech folder. Refuses anything broad
