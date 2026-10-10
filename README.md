@@ -14,7 +14,7 @@ through Finder so **Put Back** works: open the Trash, select an item, choose
 | Apps | `/Applications/AntennaHead.app`, `/Applications/ControlBooth.app` (also `~/Applications`) |
 | Per-app data | `~/Library/Containers/<id>`, `Application Support/AntennaHead` and `/ControlBooth`, `Caches`, `WebKit`, `HTTPStorages`, `Preferences/<id>.plist`, `Application Scripts/<id>`, `Saved Application State`, `Logs` |
 | Shared | the App Group container `group.com.dsward.antennahead`, and its `Application Scripts` folder |
-| Optional | **Recordings** (inside the group container; *kept by default*), the **text-to-speech folder** (a folder you pick; AntennaHead doesn't record where it is), the **"AntennaHead Self-Signed" TLS certificate** in your login keychain, and the **Gqrx for AntennaHead** app |
+| Optional | the **dsd-neo-macos** install in `/Applications` (*unticked by default*; its talkgroup lists, site caches and logs are already inside ControlBooth's `Application Support/dsd-neo`), **Recordings** (inside the group container; *kept by default*), the **text-to-speech folder** (a folder you pick; AntennaHead doesn't record where it is), the **"AntennaHead Self-Signed" TLS certificate** in your login keychain, and the **Gqrx for AntennaHead** app |
 
 Only items that actually exist on that Mac are listed. AntennaHead and ControlBooth are
 quit first.
