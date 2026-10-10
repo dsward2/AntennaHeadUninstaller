@@ -83,7 +83,10 @@ struct Catalog {
         func appData(_ name: String, _ bundleID: String, _ group: UninstallItem.Group) {
             let lib = library
             add("\(bundleID):container", group, "App container", "Database, settings and identity files (sandbox)", lib.appendingPathComponent("Containers/\(bundleID)"))
-            add("\(bundleID):support", group, "Application Support", "Database and identity files", lib.appendingPathComponent("Application Support/\(name)"))
+            add("\(bundleID):support", group, "Application Support",
+                name == "ControlBooth" ? "Database, plus the dsd-neo scanner’s talkgroup lists, site caches and logs (dsd-neo folder)"
+                                       : "Database and identity files",
+                lib.appendingPathComponent("Application Support/\(name)"))
             add("\(bundleID):caches", group, "Caches", "Cached data", lib.appendingPathComponent("Caches/\(bundleID)"))
             add("\(bundleID):webkit", group, "WebKit data", "Web view storage", lib.appendingPathComponent("WebKit/\(bundleID)"))
             add("\(bundleID):http", group, "HTTP storage", "Cookies and URL cache", lib.appendingPathComponent("HTTPStorages/\(bundleID)"))
@@ -113,6 +116,16 @@ struct Catalog {
                                      title: "Self-signed TLS certificate",
                                      detail: "“\(AppIDs.certificateName)” in your login keychain. This can’t be restored with Put Back.",
                                      url: nil, selected: true))
+        }
+        // The dsd-neo build ControlBooth's scanner runs (github.com/arancormonk/dsd-neo). The user
+        // installs it by hand and it works on its own, so it is offered but not ticked.
+        for dir in applicationDirectories {
+            let dsd = dir.appendingPathComponent("dsd-neo-macos", isDirectory: true)
+            if exists(dsd.appendingPathComponent("bin/dsd-neo")) {
+                out.append(UninstallItem(id: "dsd-neo:\(dsd.path)", group: .optional, kind: .file, title: "dsd-neo-macos",
+                                         detail: "The dsd-neo program ControlBooth’s scanner runs (\(dir.path)). Its talkgroup lists and caches are under ControlBooth ▸ Application Support.",
+                                         url: dsd, selected: false))
+            }
         }
         for dir in applicationDirectories {
             let gqrx = dir.appendingPathComponent("Gqrx-for-AntennaHead.app")

@@ -45,10 +45,24 @@ final class UninstallerTests: XCTestCase {
             switch item.kind {
             case .recordings: XCTAssertFalse(item.selected, "recordings must be opt-in")
             case .file where item.title.hasPrefix("Gqrx"): XCTAssertFalse(item.selected, "Gqrx must be opt-in")
+            case .file where item.title == "dsd-neo-macos": XCTAssertFalse(item.selected, "the dsd-neo install must be opt-in")
             default: XCTAssertTrue(item.selected, item.title)
             }
         }
         XCTAssertTrue(items.contains { $0.kind == .certificate })
+    }
+
+    func testDsdNeoInstallOfferedOnlyWhenPresentAndUntickedByDefault() {
+        XCTAssertFalse(catalog(present: ["/Applications/dsd-neo-macos"]).items().contains { $0.title == "dsd-neo-macos" })
+        let item = catalog(present: ["/Applications/dsd-neo-macos/bin/dsd-neo"]).items().first { $0.title == "dsd-neo-macos" }
+        XCTAssertEqual(item?.url?.path, "/Applications/dsd-neo-macos")
+        XCTAssertEqual(item?.selected, false)
+    }
+
+    func testControlBoothSupportFolderIsDescribedAsIncludingDsdNeoData() {
+        let items = catalog(present: ["/Users/tester/Library/Application Support/ControlBooth"]).items()
+        XCTAssertTrue(items[0].detail.contains("dsd-neo"))
+        XCTAssertTrue(items[0].selected)
     }
 
     func testRecordingsOfferedOnlyWithTheGroupContainer() {
